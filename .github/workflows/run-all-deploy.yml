@@ -1,4 +1,4 @@
-name: "Run All Workflows"
+name: "Run All Deploy"
 
 on:
   workflow_dispatch:
