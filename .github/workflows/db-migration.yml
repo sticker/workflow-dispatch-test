@@ -29,5 +29,5 @@ jobs:
         run: |
           echo "Deploy Target: ${{ github.event.inputs.deployment_target }}"
           echo "branch: ${{ github.ref }}"
-          cat develop.md
+          cat main.md # failer
           sleep 5
