@@ -22,7 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.deployment_target }}
     steps:
-      - name: DB Migration to ${{ inputs.deployment_target }} by @${{ github.actor }}
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy to ${{ inputs.deployment_target }} by @${{ github.actor }}
         run: |
           echo "Deploy Target: ${{ github.event.inputs.deployment_target }}"
+          echo "branch: ${{ github.ref }}"
+          cat develop.md
           sleep 5
