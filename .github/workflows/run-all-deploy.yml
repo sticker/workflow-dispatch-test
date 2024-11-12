@@ -1,0 +1,72 @@
+name: "Run All Workflows"
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: "Deployment target"
+        required: true
+        default: "BETA_DEVELOPMENT"
+        type: choice
+        options:
+          - DEVELOPMENT
+          - PRODUCTION
+          - STAGE
+          - BETA_PRODUCTION
+          - BETA_DEVELOPMENT
+          - BETA_STAGING
+
+jobs:
+  trigger-db-migration:
+    name: "Trigger Aurora Migration"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger db-migration.yml
+        id: db_migration
+        uses: pauldraper/workflow-dispatch@v1.6
+        with:
+          workflow: db-migration.yml
+          inputs: '{"deployment_target": "${{ github.event.inputs.deployment_target }}"}'
+          wait: true
+      - name: Check Conclusion
+        if: ${{ steps.db_migration.outputs.conclusion != 'success' }}
+        run: |
+          echo "db-migration.yml failed with conclusion: ${{ steps.db_migration.outputs.conclusion }}"
+          exit 1
+
+  trigger-deploy:
+    name: "Trigger Deploy BE"
+    needs: trigger-db-migration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy.yml
+        id: deploy
+        uses: pauldraper/workflow-dispatch@v1.6
+        with:
+          workflow: deploy.yml
+          inputs: '{"deployment_target": "${{ github.event.inputs.deployment_target }}"}'
+          wait: true
+      - name: Check Conclusion
+        if: ${{ steps.deploy.outputs.conclusion != 'success' }}
+        run: |
+          echo "deploy.yml failed with conclusion: ${{ steps.deploy.outputs.conclusion }}"
+          exit 1
+
+  trigger-deploy-batch:
+    name: "Trigger Deploy Batch"
+    needs: trigger-db-migration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy-batch.yml
+        id: deploy_batch
+        uses: pauldraper/workflow-dispatch@v1.6
+        with:
+          workflow: deploy-batch.yml
+          inputs: '{"deployment_target": "${{ github.event.inputs.deployment_target }}"}'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          wait: true
+      - name: Check Conclusion
+        if: ${{ steps.deploy_batch.outputs.conclusion != 'success' }}
+        run: |
+          echo "deploy-batch.yml failed with conclusion: ${{ steps.deploy_batch.outputs.conclusion }}"
+          exit 1

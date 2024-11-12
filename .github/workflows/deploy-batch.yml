@@ -1,0 +1,28 @@
+name: "Deploy batch"
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: "Deployment target"
+        required: true
+        default: "BETA_DEVELOPMENT"
+        type: choice
+        options:
+          - DEVELOPMENT
+          - PRODUCTION
+          - STAGE
+          - BETA_PRODUCTION
+          - BETA_DEVELOPMENT
+          - BETA_STAGING
+jobs:
+  batch-deploy:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.deployment_target }}
+    steps:
+      - name: Deploy Batch to ${{ inputs.deployment_target }} by @${{ github.actor }}
+        run: |
+          echo "Deploy Target: ${{ github.event.inputs.deployment_target }}"
+          sleep 5
