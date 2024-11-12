@@ -16,6 +16,10 @@ on:
           - BETA_DEVELOPMENT
           - BETA_STAGING
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   trigger-db-migration:
     name: "Trigger Aurora Migration"
@@ -63,7 +67,6 @@ jobs:
         with:
           workflow: deploy-batch.yml
           inputs: '{"deployment_target": "${{ github.event.inputs.deployment_target }}"}'
-          token: ${{ secrets.GITHUB_TOKEN }}
           wait: true
       - name: Check Conclusion
         if: ${{ steps.deploy_batch.outputs.conclusion != 'success' }}

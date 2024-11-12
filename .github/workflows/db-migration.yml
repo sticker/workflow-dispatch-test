@@ -22,9 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.deployment_target }}
     steps:
-      - name: DB Migration
-        uses: actions/github-script@v6
-        with:
-          script: |
-            console.log(`Deployment target: ${{ inputs.deployment_target }}`);
-            await new Promise(resolve => setTimeout(resolve, 5000));
+      - name: DB Migration to ${{ inputs.deployment_target }} by @${{ github.actor }}
+        run: |
+          echo "Deploy Target: ${{ github.event.inputs.deployment_target }}"
+          sleep 5
